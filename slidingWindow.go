@@ -27,6 +27,11 @@ type slidingWindow struct {
 }
 
 func New(windowSize int) SlidingWindow {
+	// Set windowSize to a sane minimum; this also helps to get around the edge case of windowSize being <= 0
+	if windowSize < 2 {
+		windowSize = 2
+	}
+
 	return &slidingWindow{
 		size:   windowSize,
 		window: make([]float64, windowSize),
@@ -98,9 +103,15 @@ func (s *slidingWindow) Avg() float64 {
 }
 
 func (s *slidingWindow) WeightedAvg(weightFn WeightFn) float64 {
+	if s.Count() == 0 {
+		// In order to avoid division by zero below
+		return 0
+	}
+
 	sum, denominator := s.reduce(weightFn)
 
 	return sum / denominator
 }
 
 // TODO: Add thread safe implementation via decorator pattern
+// TODO: Should we filter non-numeric float values, i.e. NaN and inf

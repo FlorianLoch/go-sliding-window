@@ -7,10 +7,26 @@ import (
 )
 
 func TestSlidingWindow(t *testing.T) {
-	t.Run("not-yet-full window", func(t *testing.T) {
+	t.Run("empty window", func(t *testing.T) {
 		r := require.New(t)
 
 		// Cast to concrete type, otherwise we cannot inspect the internals
+		slider := New(1).(*slidingWindow)
+
+		r.Equal(0, slider.Count())
+		// We expect the windowSize to be adjusted 2
+		r.Equal(2, slider.Size())
+		r.Equal(0, slider.head)
+		r.Equal(false, slider.windowFull)
+
+		r.Equal(0.0, slider.Sum())
+		r.Equal(0.0, slider.Avg())
+		r.Equal(0.0, slider.WeightedAvg(PositionBasedWeight))
+	})
+
+	t.Run("not-yet-full window", func(t *testing.T) {
+		r := require.New(t)
+
 		slider := New(3).(*slidingWindow)
 
 		slider.Digest(1).Digest(2)
