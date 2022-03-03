@@ -1,6 +1,7 @@
 package slidingwindow
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -58,6 +59,18 @@ func TestSlidingWindow(t *testing.T) {
 		r.Equal(9.0, slider.Sum())
 		r.Equal(3.0, slider.Avg())
 		r.Equal(20.0/6.0, slider.WeightedAvg(PositionBasedWeight))
+
+		// Adding NaN is not so nice...
+		slider.Digest(math.NaN())
+
+		r.Equal(3, slider.Count())
+		r.Equal(3, slider.Size())
+		r.Equal(2, slider.head)
+		r.Equal(true, slider.windowFull)
+
+		r.True(math.IsNaN(slider.Sum()))
+		r.True(math.IsNaN(slider.Avg()))
+		r.True(math.IsNaN(slider.WeightedAvg(PositionBasedWeight)))
 	})
 }
 

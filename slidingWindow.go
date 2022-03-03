@@ -15,7 +15,7 @@ var EqualWeight WeightFn = nil
 
 var PositionBasedWeight WeightFn = func(i, n int) float64 {
 	// It is necessary to add 1 - otherwise the first value (with index 0) would basically be dropped.
-	// In case of window size 1 that would even lead to a division by zero.
+	// In case of window size 1 that additionally would even lead to a division by zero.
 	return float64(i + 1)
 }
 
