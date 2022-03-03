@@ -1,5 +1,9 @@
 package slidingwindow
 
+import (
+	"sync"
+)
+
 type SlidingWindow interface {
 	Digest(val float64) SlidingWindow
 	Count() int
@@ -113,5 +117,53 @@ func (s *slidingWindow) WeightedAvg(weightFn WeightFn) float64 {
 	return sum / denominator
 }
 
-// TODO: Add thread safe implementation via decorator pattern
-// TODO: Should we filter non-numeric float values, i.e. NaN and inf
+type synchronizedSlidingWindow struct {
+	SlidingWindow
+	lock sync.RWMutex
+}
+
+func NewSynchronized(windowSize int) SlidingWindow {
+	return &synchronizedSlidingWindow{
+		SlidingWindow: New(windowSize),
+		lock:          sync.RWMutex{},
+	}
+}
+
+func (s *synchronizedSlidingWindow) Digest(val float64) SlidingWindow {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	s.SlidingWindow.Digest(val)
+
+	return s
+}
+
+func (s *synchronizedSlidingWindow) Count() int {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
+	return s.SlidingWindow.Count()
+}
+
+// No need to wrap Size() as this one just returns a static value, no change of a race
+
+func (s *synchronizedSlidingWindow) Sum() float64 {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
+	return s.SlidingWindow.Sum()
+}
+
+func (s *synchronizedSlidingWindow) Avg() float64 {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
+	return s.SlidingWindow.Avg()
+}
+
+func (s *synchronizedSlidingWindow) WeightedAvg(weightFn WeightFn) float64 {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
+	return s.SlidingWindow.WeightedAvg(weightFn)
+}
