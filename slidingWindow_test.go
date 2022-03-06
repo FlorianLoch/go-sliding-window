@@ -36,7 +36,7 @@ func TestSlidingWindow(t *testing.T) {
 		// Cast to concrete type, otherwise we cannot inspect the internals
 		core := slider.slidingWindowCore.(*synchronizedCore)
 
-		slider.Add(1).Add(2)
+		slider.AddInt(1).AddInt(2)
 
 		r.Equal(2, slider.Count())
 		r.Equal(3, slider.Size())

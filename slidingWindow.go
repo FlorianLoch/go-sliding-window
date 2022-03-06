@@ -32,6 +32,10 @@ func (s *SlidingWindow) Add(val float64) *SlidingWindow {
 	return s
 }
 
+func (s *SlidingWindow) AddInt(val int) *SlidingWindow {
+	return s.Add(float64(val))
+}
+
 func (s *SlidingWindow) Sum() float64 {
 	sum, _ := s.slidingWindowCore.reduce(EqualWeight)
 
